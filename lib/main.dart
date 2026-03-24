@@ -4,6 +4,45 @@ void main() {
   runApp(const MyApp());
 }
 
+// ─────────────────────────────────────────────
+// Data Model
+// ─────────────────────────────────────────────
+class Recipe {
+  String name;
+  String ingredients;
+  String steps;
+  String category;
+  String time;
+
+  Recipe({
+    required this.name,
+    required this.ingredients,
+    required this.steps,
+    required this.category,
+    required this.time,
+  });
+}
+
+// ─────────────────────────────────────────────
+// In-memory data store (shared across screens)
+// ─────────────────────────────────────────────
+class RecipeStore {
+  static final List<Recipe> recipes = [
+    Recipe(
+      name: "Veg Biryani",
+      ingredients:
+      "2 cups Basmati Rice\n1 cup Mixed Vegetables\n2 Onions\n2 Tomatoes\nBiryani Masala\nSalt\nOil",
+      steps:
+      "Wash and soak the rice for 20 minutes.\nHeat oil in a pan and fry sliced onions.\nAdd tomatoes and cook until soft.\nAdd vegetables and spices.\nAdd soaked rice and water.\nCook for 20 minutes until rice is done.",
+      category: "Indian",
+      time: "40 mins",
+    ),
+  ];
+}
+
+// ─────────────────────────────────────────────
+// App
+// ─────────────────────────────────────────────
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -21,7 +60,9 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// --- 1. SplashScreen ---
+// ─────────────────────────────────────────────
+// 1. SplashScreen
+// ─────────────────────────────────────────────
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -36,14 +77,12 @@ class _SplashScreenState extends State<SplashScreen> {
     _navigateToHome();
   }
 
-  void _navigateToHome() async {
-    // Wait for 3 seconds before switching screens
+  Future<void> _navigateToHome() async {
     await Future.delayed(const Duration(seconds: 3));
     if (!mounted) return;
-
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const HomeScreen()),
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
     );
   }
 
@@ -64,7 +103,9 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 }
 
-// --- 2. HomeScreen ---
+// ─────────────────────────────────────────────
+// 2. HomeScreen
+// ─────────────────────────────────────────────
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -84,12 +125,14 @@ class HomeScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Safe image loading with a fallback icon
               Image.asset(
                 'assets/images/chefs-hat.png',
                 height: 120,
-                errorBuilder: (context, error, stackTrace) =>
-                const Icon(Icons.restaurant, size: 100, color: Colors.deepOrange),
+                errorBuilder: (_, __, ___) => const Icon(
+                  Icons.restaurant,
+                  size: 100,
+                  color: Colors.deepOrange,
+                ),
               ),
               const SizedBox(height: 20),
               const Text(
@@ -102,60 +145,30 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 30),
-
-              // All Recipes Button
-              ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const AllRecipeScreen()),
-                  );
-                },
-                icon: const Icon(Icons.menu_book),
-                label: const Text("All Recipes", style: TextStyle(fontSize: 18)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.deepOrange,
-                  side: const BorderSide(color: Colors.deepOrange, width: 2),
-                  padding: const EdgeInsets.symmetric(vertical: 15),
+              _HomeButton(
+                icon: Icons.menu_book,
+                label: "All Recipes",
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AllRecipeScreen()),
                 ),
               ),
               const SizedBox(height: 15),
-
-              // Add Recipe Button
-              ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const AddRecipeScreen()),
-                  );
-                },
-                icon: const Icon(Icons.add),
-                label: const Text("Add Recipe", style: TextStyle(fontSize: 18)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.deepOrange,
-                  side: const BorderSide(color: Colors.deepOrange, width: 2),
-                  padding: const EdgeInsets.symmetric(vertical: 15),
+              _HomeButton(
+                icon: Icons.add,
+                label: "Add Recipe",
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AddRecipeScreen()),
                 ),
               ),
               const SizedBox(height: 15),
-
-              // Categories Button
-              ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const CategoriesScreen()),
-                  );
-                },
-                icon: const Icon(Icons.category),
-                label: const Text("Categories", style: TextStyle(fontSize: 18)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.deepOrange,
-                  side: const BorderSide(color: Colors.deepOrange, width: 2),
-                  padding: const EdgeInsets.symmetric(vertical: 15),
+              _HomeButton(
+                icon: Icons.category,
+                label: "Categories",
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CategoriesScreen()),
                 ),
               ),
             ],
@@ -166,20 +179,50 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-// --- 3. CategoriesScreen ---
-class CategoriesScreen extends StatelessWidget {
-  const CategoriesScreen({super.key});
+// Reusable home button widget
+class _HomeButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onPressed;
+
+  const _HomeButton({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final List<Map<String, dynamic>> categories = [
-      {"name": "Indian", "icon": Icons.rice_bowl},
-      {"name": "Italian", "icon": Icons.local_pizza},
-      {"name": "Chinese", "icon": Icons.ramen_dining},
-      {"name": "Mexican", "icon": Icons.local_dining},
-      {"name": "Desserts", "icon": Icons.cake},
-    ];
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon),
+      label: Text(label, style: const TextStyle(fontSize: 18)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.deepOrange,
+        side: const BorderSide(color: Colors.deepOrange, width: 2),
+        padding: const EdgeInsets.symmetric(vertical: 15),
+      ),
+    );
+  }
+}
 
+// ─────────────────────────────────────────────
+// 3. CategoriesScreen
+// ─────────────────────────────────────────────
+class CategoriesScreen extends StatelessWidget {
+  const CategoriesScreen({super.key});
+
+  static const List<Map<String, dynamic>> _categories = [
+    {"name": "Indian", "icon": Icons.rice_bowl},
+    {"name": "Italian", "icon": Icons.local_pizza},
+    {"name": "Chinese", "icon": Icons.ramen_dining},
+    {"name": "Mexican", "icon": Icons.local_dining},
+    {"name": "Desserts", "icon": Icons.cake},
+  ];
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Categories"),
@@ -191,7 +234,7 @@ class CategoriesScreen extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: GridView.builder(
-          itemCount: categories.length,
+          itemCount: _categories.length,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             crossAxisSpacing: 16,
@@ -199,11 +242,18 @@ class CategoriesScreen extends StatelessWidget {
             childAspectRatio: 1,
           ),
           itemBuilder: (context, index) {
+            final category = _categories[index];
             return InkWell(
-              onTap: () {
-                // Future: Navigate to a specific category page
-                print("Selected: ${categories[index]["name"]}");
-              },
+              borderRadius: BorderRadius.circular(15),
+              // FIX: actually navigate to filtered recipe list
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => AllRecipeScreen(
+                    filterCategory: category["name"] as String,
+                  ),
+                ),
+              ),
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -221,13 +271,13 @@ class CategoriesScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      categories[index]["icon"],
+                      category["icon"] as IconData,
                       size: 50,
                       color: Colors.deepOrange,
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      categories[index]["name"],
+                      category["name"] as String,
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -245,51 +295,93 @@ class CategoriesScreen extends StatelessWidget {
   }
 }
 
-// --- 4. Add Recipe Screen ---
+// ─────────────────────────────────────────────
+// 4. AddRecipeScreen
+// ─────────────────────────────────────────────
 class AddRecipeScreen extends StatefulWidget {
-  const AddRecipeScreen({super.key});
+  // FIX: support editing an existing recipe
+  final Recipe? existingRecipe;
+  final int? recipeIndex;
+
+  const AddRecipeScreen({super.key, this.existingRecipe, this.recipeIndex});
+
   @override
-  State<AddRecipeScreen> createState() => AddRecipeScreenState();
+  State<AddRecipeScreen> createState() => _AddRecipeScreenState();
 }
 
-class AddRecipeScreenState extends State<AddRecipeScreen> {
+class _AddRecipeScreenState extends State<AddRecipeScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController nametxt = TextEditingController();
-  final TextEditingController ingredents = TextEditingController();
-  final TextEditingController steps = TextEditingController();
-  final TextEditingController timecontroller = TextEditingController();
+  late final TextEditingController _nameController;
+  late final TextEditingController _ingredientsController;
+  late final TextEditingController _stepsController;
+  late final TextEditingController _timeController;
 
-  String? selectedCategory;
-  late final List<String> categories = [
+  String? _selectedCategory;
+
+  static const List<String> _categories = [
     "Indian",
     "Italian",
     "Chinese",
     "Mexican",
-    "Desserts"
+    "Desserts",
   ];
 
-  void submitForm() {
-    if (_formKey.currentState!.validate()) {
-      if (selectedCategory == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Please select category")),
-        );
-        return;
-      }
+  bool get _isEditing => widget.existingRecipe != null;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Recipe Added Successfully!", style: TextStyle(color: Colors.white)),
-          backgroundColor: Colors.deepOrange,
-        ),
-      );
-
-      Navigator.pop(context);
-    }
+  @override
+  void initState() {
+    super.initState();
+    // FIX: pre-fill fields when editing
+    final r = widget.existingRecipe;
+    _nameController = TextEditingController(text: r?.name ?? '');
+    _ingredientsController = TextEditingController(text: r?.ingredients ?? '');
+    _stepsController = TextEditingController(text: r?.steps ?? '');
+    _timeController = TextEditingController(text: r?.time ?? '');
+    _selectedCategory = r?.category;
   }
 
-  // Helper method for styling text fields based on Rsodu theme
-  InputDecoration _buildInputDecoration(String label) {
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _ingredientsController.dispose();
+    _stepsController.dispose();
+    _timeController.dispose();
+    super.dispose();
+  }
+
+  void _submitForm() {
+    if (!_formKey.currentState!.validate()) return;
+
+    final recipe = Recipe(
+      name: _nameController.text.trim(),
+      ingredients: _ingredientsController.text.trim(),
+      steps: _stepsController.text.trim(),
+      category: _selectedCategory!,
+      time: _timeController.text.trim(),
+    );
+
+    if (_isEditing && widget.recipeIndex != null) {
+      // FIX: update existing recipe in store
+      RecipeStore.recipes[widget.recipeIndex!] = recipe;
+    } else {
+      // FIX: actually save new recipe to store
+      RecipeStore.recipes.add(recipe);
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          _isEditing ? "Recipe Updated!" : "Recipe Added Successfully!",
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.deepOrange,
+      ),
+    );
+
+    Navigator.pop(context, true); // return true to signal a change
+  }
+
+  InputDecoration _inputDecoration(String label) {
     return InputDecoration(
       labelText: label,
       labelStyle: const TextStyle(color: Colors.deepOrange),
@@ -313,11 +405,13 @@ class AddRecipeScreenState extends State<AddRecipeScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Add Recipes", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          _isEditing ? "Edit Recipe" : "Add Recipe",
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.deepOrange,
         foregroundColor: Colors.white,
         centerTitle: true,
-        elevation: 0,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -327,71 +421,58 @@ class AddRecipeScreenState extends State<AddRecipeScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextFormField(
-                controller: nametxt,
-                style: const TextStyle(color: Colors.black),
-                decoration: _buildInputDecoration("Recipe Name"),
-                validator: (value) =>
-                value == null || value.isEmpty ? "Please enter recipe name" : null,
+                controller: _nameController,
+                decoration: _inputDecoration("Recipe Name"),
+                validator: (v) =>
+                (v == null || v.isEmpty) ? "Please enter recipe name" : null,
               ),
-              const SizedBox(height: 19),
+              const SizedBox(height: 16),
               TextFormField(
-                controller: ingredents,
-                style: const TextStyle(color: Colors.black),
-                decoration: _buildInputDecoration("Recipe Ingredients"),
-                validator: (value) =>
-                value == null || value.isEmpty ? "Please enter ingredients" : null,
+                controller: _ingredientsController,
+                decoration: _inputDecoration("Ingredients (one per line)"),
+                maxLines: 4,
+                validator: (v) =>
+                (v == null || v.isEmpty) ? "Please enter ingredients" : null,
               ),
-              const SizedBox(height: 19),
+              const SizedBox(height: 16),
               TextFormField(
-                controller: steps,
-                style: const TextStyle(color: Colors.black),
-                decoration: _buildInputDecoration("Steps"),
-                validator: (value) =>
-                value == null || value.isEmpty ? "Please enter steps" : null,
+                controller: _stepsController,
+                decoration: _inputDecoration("Steps (one per line)"),
+                maxLines: 4,
+                validator: (v) =>
+                (v == null || v.isEmpty) ? "Please enter steps" : null,
               ),
-              const SizedBox(height: 19),
-
+              const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: selectedCategory,
+                value: _selectedCategory,
                 dropdownColor: Colors.white,
-                style: const TextStyle(color: Colors.black),
-                decoration: _buildInputDecoration("Select Category"),
-                items: categories
-                    .map(
-                      (category) => DropdownMenuItem(
-                    value: category,
-                    child: Text(category),
-                  ),
-                ).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedCategory = value;
-                  });
-                },
-                validator: (value) =>
-                value == null ? "Please select category" : null,
+                decoration: _inputDecoration("Select Category"),
+                items: _categories
+                    .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                    .toList(),
+                onChanged: (v) => setState(() => _selectedCategory = v),
+                validator: (v) =>
+                v == null ? "Please select a category" : null,
               ),
-              const SizedBox(height: 19),
+              const SizedBox(height: 16),
               TextFormField(
-                controller: timecontroller,
-                style: const TextStyle(color: Colors.black),
-                decoration: _buildInputDecoration("Required Time (e.g., 30 mins)"),
-                validator: (value) =>
-                value == null || value.isEmpty ? "Please enter required time" : null,
+                controller: _timeController,
+                decoration: _inputDecoration("Required Time (e.g., 30 mins)"),
+                validator: (v) =>
+                (v == null || v.isEmpty) ? "Please enter required time" : null,
               ),
               const SizedBox(height: 25),
-
-              // Submit Button
               ElevatedButton(
-                onPressed: submitForm,
+                onPressed: _submitForm,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepOrange,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 15),
                 ),
-                child: const Text(
-                  "Save Recipe",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                child: Text(
+                  _isEditing ? "Update Recipe" : "Save Recipe",
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -402,24 +483,267 @@ class AddRecipeScreenState extends State<AddRecipeScreen> {
   }
 }
 
-// --- 5. All Recipe Screen (Pending) ---
-class AllRecipeScreen extends StatelessWidget {
-  const AllRecipeScreen({super.key});
+// ─────────────────────────────────────────────
+// 5. AllRecipeScreen  (FIX: fully implemented)
+// ─────────────────────────────────────────────
+class AllRecipeScreen extends StatefulWidget {
+  final String? filterCategory;
+
+  const AllRecipeScreen({super.key, this.filterCategory});
+
+  @override
+  State<AllRecipeScreen> createState() => _AllRecipeScreenState();
+}
+
+class _AllRecipeScreenState extends State<AllRecipeScreen> {
+  List<Recipe> get _recipes {
+    if (widget.filterCategory == null) return RecipeStore.recipes;
+    return RecipeStore.recipes
+        .where((r) => r.category == widget.filterCategory)
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final title =
+    widget.filterCategory != null ? widget.filterCategory! : "All Recipes";
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('All Recipes'),
+        title: Text(title),
         backgroundColor: Colors.deepOrange,
         foregroundColor: Colors.white,
       ),
-      body: const Center(
-          child: Text(
-              'All Recipes Screen (Pending)',
-              style: TextStyle(color: Colors.deepOrange, fontSize: 16)
-          )
+      // FIX: FAB to add a recipe directly from this screen
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.deepOrange,
+        foregroundColor: Colors.white,
+        onPressed: () async {
+          final changed = await Navigator.push<bool>(
+            context,
+            MaterialPageRoute(builder: (_) => const AddRecipeScreen()),
+          );
+          if (changed == true) setState(() {});
+        },
+        child: const Icon(Icons.add),
+      ),
+      body: _recipes.isEmpty
+          ? const Center(
+        child: Text(
+          "No recipes yet. Tap + to add one!",
+          style: TextStyle(color: Colors.deepOrange, fontSize: 16),
+        ),
+      )
+          : ListView.separated(
+        padding: const EdgeInsets.all(12),
+        itemCount: _recipes.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 8),
+        itemBuilder: (context, index) {
+          final recipe = _recipes[index];
+          return Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: const BorderSide(color: Colors.deepOrange, width: 1),
+            ),
+            child: ListTile(
+              leading: const CircleAvatar(
+                backgroundColor: Colors.deepOrange,
+                child: Icon(Icons.restaurant, color: Colors.white),
+              ),
+              title: Text(
+                recipe.name,
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              subtitle: Text(
+                  "${recipe.category}  •  ${recipe.time}"),
+              trailing: const Icon(Icons.chevron_right,
+                  color: Colors.deepOrange),
+              onTap: () async {
+                // FIX: find the actual index in the master list
+                final masterIndex =
+                RecipeStore.recipes.indexOf(recipe);
+                final changed = await Navigator.push<bool>(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => RecipeDetailPage(
+                      recipe: recipe,
+                      recipeIndex: masterIndex,
+                    ),
+                  ),
+                );
+                if (changed == true) setState(() {});
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+// 6. RecipeDetailPage  (FIX: dynamic data, working edit/delete)
+// ─────────────────────────────────────────────
+class RecipeDetailPage extends StatelessWidget {
+  final Recipe recipe;
+  final int recipeIndex;
+
+  const RecipeDetailPage({
+    super.key,
+    required this.recipe,
+    required this.recipeIndex,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ingredients =
+    recipe.ingredients.split('\n').where((s) => s.isNotEmpty).toList();
+    final steps =
+    recipe.steps.split('\n').where((s) => s.isNotEmpty).toList();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(recipe.name),
+        backgroundColor: Colors.deepOrange,
+        foregroundColor: Colors.white,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Info chips
+              Wrap(
+                spacing: 8,
+                children: [
+                  Chip(
+                    avatar: const Icon(Icons.category,
+                        size: 16, color: Colors.white),
+                    label: Text(recipe.category,
+                        style: const TextStyle(color: Colors.white)),
+                    backgroundColor: Colors.deepOrange,
+                  ),
+                  Chip(
+                    avatar: const Icon(Icons.timer,
+                        size: 16, color: Colors.white),
+                    label: Text(recipe.time,
+                        style: const TextStyle(color: Colors.white)),
+                    backgroundColor: Colors.deepOrange,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Ingredients
+              const Text(
+                "Ingredients",
+                style:
+                TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              ...ingredients.map(
+                    (item) => ListTile(
+                  dense: true,
+                  leading: const Icon(Icons.check_circle,
+                      color: Colors.deepOrange),
+                  title: Text(item),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Steps
+              const Text(
+                "Preparation Steps",
+                style:
+                TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              ...steps.asMap().entries.map(
+                    (entry) => ListTile(
+                  dense: true,
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.deepOrange,
+                    foregroundColor: Colors.white,
+                    child: Text("${entry.key + 1}"),
+                  ),
+                  title: Text(entry.value),
+                ),
+              ),
+
+              const SizedBox(height: 30),
+
+              // Action buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // FIX: Edit navigates to AddRecipeScreen pre-filled
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () async {
+                      final changed = await Navigator.push<bool>(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => AddRecipeScreen(
+                            existingRecipe: recipe,
+                            recipeIndex: recipeIndex,
+                          ),
+                        ),
+                      );
+                      if (changed == true && context.mounted) {
+                        Navigator.pop(context, true);
+                      }
+                    },
+                    icon: const Icon(Icons.edit),
+                    label: const Text("Edit"),
+                  ),
+
+                  // FIX: Delete actually removes from store
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          title: const Text("Delete Recipe"),
+                          content: Text(
+                              "Are you sure you want to delete '${recipe.name}'?"),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text("Cancel"),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                RecipeStore.recipes.removeAt(recipeIndex);
+                                Navigator.pop(context); // close dialog
+                                Navigator.pop(context, true); // back to list
+                              },
+                              child: const Text("Delete",
+                                  style: TextStyle(color: Colors.red)),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.delete),
+                    label: const Text("Delete"),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
